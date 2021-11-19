@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <openssl/engine.h>
+#include "demo_digests.h"
 
 static const char *engine_id = "demo";
 static const char *engine_name = "A demo engine";
@@ -8,12 +9,19 @@ static int bind(ENGINE *e, const char *id)
 {
     int ret = 0;
 
+    (void)id;
+
     if (!ENGINE_set_id(e, engine_id)) {
         fprintf(stderr, "ENGINE_set_id failed\n");
         goto end;
     }
 
     if (!ENGINE_set_name(e, engine_name)) {
+        printf("ENGINE_set_name failed\n");
+        goto end;
+    }
+
+    if (!ENGINE_set_digests(e, demo_digests)) {
         printf("ENGINE_set_name failed\n");
         goto end;
     }

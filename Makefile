@@ -17,3 +17,5 @@ clean:
 
 test:
 	/usr/local/babassl-share/bin/openssl engine -t -c `pwd`/demo.so
+	echo whatever | /usr/local/babassl-share/bin/openssl dgst -md5 -engine `pwd`/demo.so
+	echo whatever | /usr/local/babassl-share/bin/openssl dgst -md5
