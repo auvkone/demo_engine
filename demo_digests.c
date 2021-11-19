@@ -24,34 +24,48 @@ static int md5_final(EVP_MD_CTX *ctx, unsigned char *md)
     return 1;
 }
 
+static EVP_MD *_hidden_md5_md = NULL;
+
 static const EVP_MD *digest_md5(void)
 {
     EVP_MD *md = NULL;
     int res = 1;
 
-    if ((md = EVP_MD_meth_new(NID_md5, NID_md5WithRSAEncryption)) == NULL) {
-        printf("Failed to allocate digest methods for nid %d\n", NID_md5);
-        return NULL;
+    if (_hidden_md5_md == NULL) {
+        if ((md = EVP_MD_meth_new(NID_md5, NID_md5WithRSAEncryption)) == NULL) {
+            printf("Failed to allocate digest methods for nid %d\n", NID_md5);
+            return NULL;
+        }
+
+        res &= EVP_MD_meth_set_result_size(md, MD5_DIGEST_LENGTH);
+        res &= EVP_MD_meth_set_input_blocksize(md, MD5_CBLOCK);
+        res &= EVP_MD_meth_set_app_datasize(md,
+                                            sizeof(EVP_MD*) + sizeof(MD5_CTX));
+        res &= EVP_MD_meth_set_flags(md, 0);
+        res &= EVP_MD_meth_set_init(md, md5_init);
+        res &= EVP_MD_meth_set_update(md, md5_update);
+        res &= EVP_MD_meth_set_final(md, md5_final);
+
+        if (0 == res) {
+            printf("Failed to set cipher methods for nid %d\n", NID_md5);
+            EVP_MD_meth_free(md);
+            md = NULL;
+        }
+
+        _hidden_md5_md = md;
     }
 
-    res &= EVP_MD_meth_set_result_size(md, MD5_DIGEST_LENGTH);
-    res &= EVP_MD_meth_set_input_blocksize(md, MD5_CBLOCK);
-    res &= EVP_MD_meth_set_app_datasize(md, sizeof(EVP_MD*) + sizeof(MD5_CTX));
-    res &= EVP_MD_meth_set_flags(md, 0);
-    res &= EVP_MD_meth_set_init(md, md5_init);
-    res &= EVP_MD_meth_set_update(md, md5_update);
-    res &= EVP_MD_meth_set_final(md, md5_final);
-
-    if (0 == res) {
-        printf("Failed to set cipher methods for nid %d\n", NID_md5);
-        EVP_MD_meth_free(md);
-        md = NULL;
-    }
-
-    return md;
+    return _hidden_md5_md;
 }
 
 static int digest_nids[] = { NID_md5, 0 };
+
+void demo_destroy_digests(void)
+{
+    EVP_MD_meth_free(_hidden_md5_md);
+    _hidden_md5_md = NULL;
+}
+
 int demo_digests(ENGINE *e, const EVP_MD **digest, const int **nids, int nid)
 {
     int ok = 1;
