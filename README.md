@@ -1,11 +1,15 @@
 # demo_engine
 Simple demo engine
 
-## Requirements
-BabaSSL
+### Requirements
+- BabaSSL
 
-## Build
+### Build
+```
 make
+```
 
-## Test
+### Test
+```
 make test
+```
