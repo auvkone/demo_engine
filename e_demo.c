@@ -25,10 +25,3 @@ end:
 
 IMPLEMENT_DYNAMIC_BIND_FN(bind)
 IMPLEMENT_DYNAMIC_CHECK_FN()
-
-/*
-gcc -fPIC -o e_demo.o -c e_demo.c -I/usr/local/babassl-share/include
-gcc -shared -o e_demo.so -L/usr/local/babassl-share/lib/ -lcrypto e_demo.o
-
-/usr/local/babassl-share/bin/openssl engine -t -c `pwd`/e_demo.so
- */
